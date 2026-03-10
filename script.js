@@ -96,12 +96,15 @@ const HEADER_PROGRESS_MAX = APP_CONFIG.resultBands.reduce(
   (max, band) => (Number.isFinite(band.max) ? Math.max(max, band.max) : max),
   0
 );
+const DEFAULT_SHARE_BUTTON_LABEL = "שתפו את התוצאה";
 
 const state = {
   answers: {},
   bonuses: new Set(),
   animatedScore: 0,
-  scoreAnimationFrame: null
+  scoreAnimationFrame: null,
+  isSharing: false,
+  shareFeedbackTimeout: null
 };
 
 const dom = {
@@ -113,6 +116,12 @@ const dom = {
   resultScoreLabel: document.getElementById("result-score-label"),
   resultDescription: document.getElementById("result-description"),
   shareButton: document.getElementById("share-button"),
+  shareFeedback: document.getElementById("share-feedback"),
+  shareCardExport: document.getElementById("share-card-export"),
+  shareCardProgress: document.getElementById("share-card-progress"),
+  shareCardScoreValue: document.getElementById("share-card-score-value"),
+  shareCardScoreLabel: document.getElementById("share-card-score-label"),
+  shareCardDescription: document.getElementById("share-card-description"),
   infinityOverlay: document.getElementById("infinity-overlay"),
   overlayReset: document.getElementById("overlay-reset")
 };
@@ -144,26 +153,70 @@ function getCurrentScore() {
   };
 }
 
+function getProgressValue(score, isInfinity = false) {
+  return isInfinity ? 1 : Math.max(0, Math.min(score / HEADER_PROGRESS_MAX, 1));
+}
+
+function getShareState() {
+  const { isInfinity, score } = getCurrentScore();
+  const band = isInfinity ? APP_CONFIG.infinityResult : getResultBand(score);
+
+  return {
+    isInfinity,
+    score,
+    scoreText: isInfinity ? "∞" : String(score),
+    label: band.label,
+    description: band.description,
+    progress: getProgressValue(score, isInfinity)
+  };
+}
+
+function isQuestionnaireComplete() {
+  return APP_CONFIG.questions.every((question) => typeof state.answers[question.id] === "number");
+}
+
+function setLiveFeedback(text) {
+  dom.shareFeedback.textContent = text;
+}
+
+function updateShareButtonState() {
+  const isComplete = isQuestionnaireComplete();
+  dom.shareButton.disabled = state.isSharing || !isComplete;
+  dom.shareButton.setAttribute("aria-disabled", String(dom.shareButton.disabled));
+  dom.shareButton.title = isComplete ? "" : "השלימו את כל השאלות כדי לשתף";
+
+  if (state.isSharing) {
+    dom.shareButton.textContent = "מכינים תמונה...";
+    return;
+  }
+
+  if (dom.shareButton.dataset.feedbackActive === "true") {
+    return;
+  }
+
+  dom.shareButton.textContent = DEFAULT_SHARE_BUTTON_LABEL;
+}
+
 function setButtonFeedback(button, text) {
-  const originalText = button.textContent;
+  window.clearTimeout(state.shareFeedbackTimeout);
+  button.dataset.feedbackActive = "true";
   button.textContent = text;
-  window.setTimeout(() => {
-    button.textContent = originalText;
+  setLiveFeedback(text);
+  state.shareFeedbackTimeout = window.setTimeout(() => {
+    delete button.dataset.feedbackActive;
+    setLiveFeedback("");
+    updateShareButtonState();
   }, 1400);
 }
 
 function renderQuestions() {
   dom.questionSections.innerHTML = `
     <section class="card-section question-card">
-      <div class="section-kicker">שאלון</div>
-      <h2>השאלות שעושות סדר בבלאגן</h2>
-      <p class="section-note">ענו על השאלות הבאות. כל שאלה עומדת בפני עצמה, והניקוד מתעדכן בלייב תוך כדי.</p>
       <div class="question-list">
         ${APP_CONFIG.questions.map((question) => `
           <section class="question-block" data-question-id="${question.id}">
             <div class="section-kicker">${question.number}</div>
             <h3 class="question-title">${question.prompt}</h3>
-            <p class="section-note question-note">${APP_CONFIG.questionHelperText}</p>
             <div class="option-grid" role="radiogroup" aria-label="${question.prompt}">
               ${question.options.map((option, index) => `
                 <button
@@ -245,10 +298,22 @@ function updateBonusSelection(bonusId) {
 }
 
 function setHeaderProgress(score, isInfinity = false) {
-  const progress = isInfinity ? 1 : Math.max(0, Math.min(score / HEADER_PROGRESS_MAX, 1));
+  const progress = getProgressValue(score, isInfinity);
   dom.headerProgress.style.setProperty("--header-progress", progress.toFixed(4));
   dom.headerProgress.classList.toggle("is-active", progress > 0);
   dom.headerProgress.classList.toggle("is-infinity", isInfinity);
+}
+
+function setShareCardProgress(progress, isInfinity = false) {
+  dom.shareCardProgress.style.setProperty("--share-progress", progress.toFixed(4));
+  dom.shareCardProgress.classList.toggle("is-infinity", isInfinity);
+}
+
+function updateShareCard(resultState) {
+  dom.shareCardScoreValue.textContent = resultState.scoreText;
+  dom.shareCardScoreLabel.textContent = resultState.label;
+  dom.shareCardDescription.textContent = resultState.description;
+  setShareCardProgress(resultState.progress, resultState.isInfinity);
 }
 
 function animateScoreTo(target) {
@@ -291,61 +356,164 @@ function setInfinityMode(isVisible) {
   setHeaderProgress(HEADER_PROGRESS_MAX, isVisible);
 }
 
-function updateView() {
-  const { isInfinity, score } = getCurrentScore();
-
-  if (isInfinity) {
-    setInfinityMode(true);
-    return;
-  }
-
-  dom.infinityOverlay.classList.remove("is-visible");
-  dom.infinityOverlay.setAttribute("aria-hidden", "true");
-
-  const band = getResultBand(score);
-  dom.resultScoreLabel.textContent = band.label;
-  dom.resultDescription.textContent = band.description;
-
-  if (!Number.isFinite(state.animatedScore)) {
-    state.animatedScore = 0;
-  }
-
-  animateScoreTo(score);
+function buildShareText(resultState) {
+  const url = window.location.href;
+  return `קיבלתי ${resultState.label} (${resultState.scoreText}) במדד הדובדבן של חלאסרטן\n${APP_CONFIG.shareCta}\n${url}`;
 }
 
-async function shareResult() {
-  const { isInfinity, score } = getCurrentScore();
-  const label = isInfinity ? APP_CONFIG.infinityResult.label : getResultBand(score).label;
-  const scoreText = isInfinity ? "∞" : score;
-  const url = window.location.href;
-  const text = `קיבלתי ${label} (${scoreText}) במדד הדובדבן של חלאסרטן\n${APP_CONFIG.shareCta}\n${url}`;
+function waitForImages(container) {
+  const images = Array.from(container.querySelectorAll("img"));
 
-  try {
-    if (navigator.share) {
-      await navigator.share({
-        title: APP_CONFIG.shareTitle,
-        text,
-        url
-      });
+  return Promise.all(images.map((image) => new Promise((resolve) => {
+    if (image.complete) {
+      resolve();
       return;
     }
 
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(text);
-    } else {
-      const helper = document.createElement("textarea");
-      helper.value = text;
-      helper.setAttribute("readonly", "");
-      helper.className = "visually-hidden";
-      document.body.appendChild(helper);
-      helper.select();
-      document.execCommand("copy");
-      helper.remove();
+    image.addEventListener("load", resolve, { once: true });
+    image.addEventListener("error", resolve, { once: true });
+  })));
+}
+
+async function generateShareImageBlob() {
+  if (typeof window.html2canvas !== "function") {
+    throw new Error("Share image renderer unavailable.");
+  }
+
+  if (document.fonts?.ready) {
+    await document.fonts.ready;
+  }
+
+  await waitForImages(dom.shareCardExport);
+
+  const canvas = await window.html2canvas(dom.shareCardExport, {
+    backgroundColor: null,
+    scale: 1,
+    useCORS: true,
+    logging: false
+  });
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        reject(new Error("Failed to create share image."));
+        return;
+      }
+
+      resolve(blob);
+    }, "image/png");
+  });
+}
+
+function downloadBlob(blob, filename) {
+  const objectUrl = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = objectUrl;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+}
+
+async function copyTextToClipboard(text) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const helper = document.createElement("textarea");
+  helper.value = text;
+  helper.setAttribute("readonly", "");
+  helper.className = "visually-hidden";
+  document.body.appendChild(helper);
+  helper.select();
+  document.execCommand("copy");
+  helper.remove();
+}
+
+async function shareGeneratedImage(blob, resultState) {
+  const filename = `halasmeter-${resultState.scoreText}.png`;
+  const text = buildShareText(resultState);
+
+  if (typeof File === "function" && typeof navigator.share === "function" && typeof navigator.canShare === "function") {
+    const shareFile = new File([blob], filename, { type: "image/png" });
+
+    if (navigator.canShare({ files: [shareFile] })) {
+      await navigator.share({
+        title: APP_CONFIG.shareTitle,
+        text,
+        url: window.location.href,
+        files: [shareFile]
+      });
+      return "shared";
+    }
+  }
+
+  downloadBlob(blob, filename);
+  await copyTextToClipboard(text);
+  return "downloaded";
+}
+
+function updateView() {
+  const resultState = getShareState();
+
+  if (resultState.isInfinity) {
+    setInfinityMode(true);
+  } else {
+    dom.infinityOverlay.classList.remove("is-visible");
+    dom.infinityOverlay.setAttribute("aria-hidden", "true");
+
+    dom.resultScoreLabel.textContent = resultState.label;
+    dom.resultDescription.textContent = resultState.description;
+
+    if (!Number.isFinite(state.animatedScore)) {
+      state.animatedScore = 0;
     }
 
-    setButtonFeedback(dom.shareButton, "הועתק");
+    animateScoreTo(resultState.score);
+  }
+
+  updateShareCard(resultState);
+  updateShareButtonState();
+}
+
+async function shareResult() {
+  if (state.isSharing || !isQuestionnaireComplete()) {
+    return;
+  }
+
+  const resultState = getShareState();
+  updateShareCard(resultState);
+  state.isSharing = true;
+  updateShareButtonState();
+
+  try {
+    const blob = await generateShareImageBlob();
+    const shareOutcome = await shareGeneratedImage(blob, resultState);
+
+    if (shareOutcome === "downloaded") {
+      setButtonFeedback(dom.shareButton, "התמונה ירדה");
+      return;
+    }
+
+    setButtonFeedback(dom.shareButton, "מוכן לשיתוף");
   } catch (error) {
-    setButtonFeedback(dom.shareButton, "לא הצליח");
+    if (error?.name === "AbortError") {
+      setLiveFeedback("");
+      return;
+    }
+
+    try {
+      await copyTextToClipboard(buildShareText(resultState));
+      setButtonFeedback(dom.shareButton, "הטקסט הועתק");
+      return;
+    } catch {
+      setButtonFeedback(dom.shareButton, "לא הצליח");
+    }
+  } finally {
+    state.isSharing = false;
+    updateShareButtonState();
   }
 }
 

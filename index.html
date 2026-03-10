@@ -31,10 +31,12 @@
 
   <main>
     <section class="hero">
-      <div class="eyebrow">חלאסרטן מגישים</div>
-      <h1>מדד הדובדבן של חלאסרטן</h1>
-      <p class="hero-lead">יש שילובים שהם פשוט מנט טו בי - שוקולד וקרמל מלוח, תותים וקצפת, מלחמה וסרטן.</p>
-      <p class="hero-subtext">תמיד אמרו לנו שצריך לדעת מתי לעצור - אבל אנחנו כנראה נועדנו להגזים. עד כמה? כמה שאלות ונגיד לך בדיוק מה מיקומך במדד הדובדבן של חלאסרטן.</p>
+      <div class="hero-copy">
+        <div class="eyebrow">חלאסרטן מגישים</div>
+        <h1>מדד הדובדבן של חלאסרטן</h1>
+        <p class="hero-lead">יש שילובים שהם פשוט מנט טו בי - שוקולד וקרמל מלוח, תותים וקצפת, מלחמה וסרטן.</p>
+        <p class="hero-subtext">תמיד אמרו לנו שצריך לדעת מתי לעצור - אבל אנחנו כנראה נועדנו להגזים. עד כמה? כמה שאלות ונגיד לך בדיוק מה מיקומך במדד הדובדבן של חלאסרטן.</p>
+      </div>
     </section>
 
     <div id="question-sections"></div>
@@ -74,6 +76,37 @@
     </section>
   </div>
 
+  <div class="share-stage" aria-hidden="true">
+    <section class="share-card-export" id="share-card-export">
+      <div class="share-card-top">
+        <span class="share-card-kicker">חלאסרטן מגישים</span>
+        <img class="share-card-logo" src="halas-logo-2.webp" alt="לוגו חלאסרטן">
+      </div>
+
+      <div class="share-card-main">
+        <p class="share-card-title">מדד הדובדבן של חלאסרטן</p>
+        <div class="share-card-score">
+          <span class="share-card-score-value" id="share-card-score-value">0</span>
+          <span class="share-card-score-label" id="share-card-score-label">דובדבן לייט</span>
+        </div>
+        <p class="share-card-description" id="share-card-description">המלחמה מבאסת, הסרטן מאחוריך. לך.י לעשות פילאטיס.</p>
+      </div>
+
+      <div class="share-card-progress-block">
+        <div class="share-card-progress" id="share-card-progress" aria-hidden="true">
+          <span class="share-card-progress-track">
+            <span class="share-card-progress-fill"></span>
+            <img class="share-card-progress-cherry" src="cherry-2.png" alt="">
+          </span>
+        </div>
+        <p class="share-card-footer">בדקו איפה אתם עומדים במדד הדובדבן של חלאסרטן</p>
+      </div>
+    </section>
+  </div>
+
+  <p class="visually-hidden" id="share-feedback" aria-live="polite" aria-atomic="true"></p>
+
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
