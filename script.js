@@ -119,6 +119,7 @@ const dom = {
   resultScoreLabel: document.getElementById("result-score-label"),
   resultDescription: document.getElementById("result-description"),
   shareButton: document.getElementById("share-button"),
+  shareButtonHelper: document.getElementById("share-button-helper"),
   shareFeedback: document.getElementById("share-feedback"),
   shareStage: document.getElementById("share-stage"),
   shareCardExport: document.getElementById("share-card-export"),
@@ -187,6 +188,45 @@ function isQuestionnaireComplete() {
   return APP_CONFIG.questions.every((question) => typeof state.answers[question.id] === "number");
 }
 
+function getUnansweredQuestions() {
+  return APP_CONFIG.questions.filter((question) => typeof state.answers[question.id] !== "number");
+}
+
+function formatMissingQuestionsText(questions) {
+  const questionNumbers = questions.map((question) => String(Number(question.number)));
+
+  if (questionNumbers.length <= 1) {
+    return questionNumbers.join("");
+  }
+
+  const lastQuestionNumber = questionNumbers[questionNumbers.length - 1];
+  return `${questionNumbers.slice(0, -1).join(", ")} ו-${lastQuestionNumber}`;
+}
+
+function getShareButtonHelperText() {
+  if (state.isSharing || isQuestionnaireComplete()) {
+    return "";
+  }
+
+  const unansweredQuestions = getUnansweredQuestions();
+
+  if (unansweredQuestions.length === APP_CONFIG.questions.length) {
+    return "מלאו לפחות את שאלות 1 עד 6, ואז שתפו את התוצאה";
+  }
+
+  if (unansweredQuestions.length === 1) {
+    return `ענו על שאלה ${formatMissingQuestionsText(unansweredQuestions)}, ואז שתפו את התוצאה`;
+  }
+
+  return `ענו על שאלות ${formatMissingQuestionsText(unansweredQuestions)}, ואז שתפו את התוצאה`;
+}
+
+function updateShareButtonHelper() {
+  const helperText = getShareButtonHelperText();
+  dom.shareButtonHelper.textContent = helperText;
+  dom.shareButtonHelper.hidden = !helperText;
+}
+
 function setLiveFeedback(text) {
   dom.shareFeedback.textContent = text;
 }
@@ -214,6 +254,7 @@ function updateShareButtonState() {
   dom.shareButton.disabled = state.isSharing || !isComplete;
   dom.shareButton.setAttribute("aria-disabled", String(dom.shareButton.disabled));
   dom.shareButton.title = isComplete ? "" : "השלימו את כל השאלות כדי לשתף";
+  updateShareButtonHelper();
   updateShareActionsState();
 
   if (state.isSharing) {
