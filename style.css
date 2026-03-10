@@ -547,7 +547,6 @@ main {
 }
 
 .result-share {
-  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -558,10 +557,15 @@ main {
   gap: 10px;
 }
 
+.result-share-button-wrap {
+  position: relative;
+  width: 100%;
+}
+
 .result-share-cherry {
   position: absolute;
-  top: 10px;
-  left: -20px;
+  top: -45px;
+  left: -30px;
   width: 68px;
   height: 68px;
   object-fit: contain;
@@ -571,7 +575,7 @@ main {
   transform: rotate(-18deg);
 }
 
-.result-share .share-button {
+.result-share-button-wrap .share-button {
   position: relative;
   z-index: 1;
   width: 100%;
@@ -608,7 +612,7 @@ main {
   padding: 88px;
   display: grid;
   grid-template-rows: auto auto auto;
-  gap: 48px;
+  gap: 24px;
   background:
     radial-gradient(circle at top right, rgba(237, 16, 104, 0.14), transparent 24%),
     radial-gradient(circle at bottom left, rgba(237, 16, 104, 0.12), transparent 28%),
@@ -619,7 +623,7 @@ main {
 .share-card-top {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 28px;
 }
 
@@ -650,9 +654,9 @@ main {
   gap: 32px;
   padding: 100px 84px;
   border-radius: 56px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(252, 251, 252, 0.98) 100%);
-  border: 1px solid rgba(237, 16, 104, 0.12);
-  box-shadow: 0 36px 90px rgba(26, 26, 26, 0.10);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(255, 253, 254, 0.995) 100%);
+  border: 1px solid rgba(237, 16, 104, 0.08);
+  box-shadow: 0 32px 80px rgba(26, 26, 26, 0.07);
   overflow: hidden;
 }
 
@@ -669,7 +673,7 @@ main {
   height: 320px;
   top: -120px;
   right: -80px;
-  background: rgba(237, 16, 104, 0.08);
+  background: rgba(237, 16, 104, 0.05);
 }
 
 .share-card-main::after {
@@ -677,7 +681,7 @@ main {
   height: 240px;
   bottom: -100px;
   left: -40px;
-  background: rgba(237, 16, 104, 0.06);
+  background: rgba(237, 16, 104, 0.035);
 }
 
 .share-card-title,
@@ -723,7 +727,7 @@ main {
 
 .share-card-progress-block {
   display: grid;
-  gap: 30px;
+  gap: 24px;
   align-self: end;
   margin-top: auto;
 }
@@ -859,7 +863,8 @@ main {
 .share-platforms {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 10px;
+  gap: 7.5px;
+  direction: ltr;
 }
 
 .share-platform-button {
@@ -1028,7 +1033,7 @@ main {
     height: 58px;
   }
 
-  .result-share .share-button {
+  .result-share-button-wrap .share-button {
     justify-content: center;
   }
 
@@ -1038,7 +1043,7 @@ main {
   }
 
   .share-platforms {
-    gap: 8px;
+    gap: 6px;
   }
 
   .share-platform-icon {
