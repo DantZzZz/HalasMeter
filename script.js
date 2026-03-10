@@ -117,6 +117,7 @@ const dom = {
   resultDescription: document.getElementById("result-description"),
   shareButton: document.getElementById("share-button"),
   shareFeedback: document.getElementById("share-feedback"),
+  shareStage: document.getElementById("share-stage"),
   shareCardExport: document.getElementById("share-card-export"),
   shareCardProgress: document.getElementById("share-card-progress"),
   shareCardScoreValue: document.getElementById("share-card-score-value"),
@@ -375,34 +376,52 @@ function waitForImages(container) {
   })));
 }
 
+function setShareStageVisibility(isVisible) {
+  dom.shareStage.hidden = !isVisible;
+  dom.shareStage.setAttribute("aria-hidden", String(!isVisible));
+}
+
+function waitForNextPaint() {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(resolve));
+  });
+}
+
 async function generateShareImageBlob() {
   if (typeof window.html2canvas !== "function") {
     throw new Error("Share image renderer unavailable.");
   }
 
+  setShareStageVisibility(true);
+
   if (document.fonts?.ready) {
     await document.fonts.ready;
   }
 
-  await waitForImages(dom.shareCardExport);
+  try {
+    await waitForImages(dom.shareCardExport);
+    await waitForNextPaint();
 
-  const canvas = await window.html2canvas(dom.shareCardExport, {
-    backgroundColor: null,
-    scale: 1,
-    useCORS: true,
-    logging: false
-  });
+    const canvas = await window.html2canvas(dom.shareCardExport, {
+      backgroundColor: null,
+      scale: 1,
+      useCORS: true,
+      logging: false
+    });
 
-  return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => {
-      if (!blob) {
-        reject(new Error("Failed to create share image."));
-        return;
-      }
+    return await new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          reject(new Error("Failed to create share image."));
+          return;
+        }
 
-      resolve(blob);
-    }, "image/png");
-  });
+        resolve(blob);
+      }, "image/png");
+    });
+  } finally {
+    setShareStageVisibility(false);
+  }
 }
 
 function downloadBlob(blob, filename) {

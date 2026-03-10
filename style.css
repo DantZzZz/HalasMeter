@@ -581,11 +581,12 @@ main {
 .share-stage {
   position: fixed;
   top: 0;
-  left: -200vw;
+  left: 0;
   width: 1080px;
   height: 1920px;
   pointer-events: none;
   z-index: -1;
+  transform: translateX(calc(-100% - 32px));
 }
 
 .share-card-export {
