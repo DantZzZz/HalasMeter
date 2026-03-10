@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>מדד הדובדבן של חלאסרטן</title>
+  <meta name="description" content="מדד הדובדבן של חלאסרטן - מחשבון ניקוד בעברית עם שאלות, בונוסים ותוצאת שיתוף.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="scorebar">
+    <div class="scorebar-inner">
+      <div class="score-pill" aria-live="polite" aria-atomic="true">
+        <span class="score-pill-label">מדד הדובדבן</span>
+        <span class="score-pill-value" id="live-score">0</span>
+      </div>
+      <div class="header-progress" id="header-progress" aria-hidden="true">
+        <span class="header-progress-track">
+          <span class="header-progress-fill"></span>
+          <img class="header-progress-cherry" src="cherry-2.png" alt="">
+        </span>
+      </div>
+      <div class="header-brand">
+        <img class="header-logo" src="halas-logo-2.webp" alt="לוגו חלאסרטן">
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="eyebrow">חלאסרטן מגישים</div>
+      <h1>מדד הדובדבן של חלאסרטן</h1>
+      <p class="hero-lead">יש שילובים שהם פשוט מנט טו בי - שוקולד וקרמל מלוח, תותים וקצפת, מלחמה וסרטן.</p>
+      <p class="hero-subtext">תמיד אמרו לנו שצריך לדעת מתי לעצור - אבל אנחנו כנראה נועדנו להגזים. עד כמה? כמה שאלות ונגיד לך בדיוק מה מיקומך במדד הדובדבן של חלאסרטן.</p>
+    </section>
+
+    <div id="question-sections"></div>
+
+    <section class="card-section" id="bonus-section">
+      <div class="section-kicker">בונוסים</div>
+      <h2>שלב הבונוסים</h2>
+      <p class="section-note">החלק שבו החיים כבר הפסיקו להסתפק בשאלה אחת בכל פעם.</p>
+      <div class="bonus-grid" id="bonus-grid"></div>
+    </section>
+
+    <section class="result-card" id="result-section" aria-live="polite" aria-atomic="true">
+      <div class="result-main">
+        <div class="result-heading">
+          <h2>התוצאה שלך</h2>
+        </div>
+        <div class="result-score">
+          <span class="result-score-value" id="result-score-value">0</span>
+          <span class="result-score-label" id="result-score-label">דובדבן לייט</span>
+        </div>
+        <p class="result-description" id="result-description">המלחמה מבאסת, הסרטן מאחוריך. לך.י לעשות פילאטיס.</p>
+      </div>
+      <div class="result-share">
+        <img class="result-share-cherry" src="cherry-2.png" alt="">
+        <button class="share-button" id="share-button" type="button">שתפו את התוצאה</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="floating-overlay" id="infinity-overlay" aria-hidden="true">
+    <section class="overlay-card" aria-labelledby="overlay-title">
+      <span class="overlay-eyebrow">המדד נשבר</span>
+      <h2 id="overlay-title">∞</h2>
+      <p>אין לנו בדיחה מספיק טובה לרגע הזה. אם יש לך סרטן ונפל טיל על הבית, מדד הדובדבן מפסיק להיות משחק של מספרים.</p>
+      <p>מבחינתנו זה לא "עוד תוצאה", זה מצב חירום פרטי בתוך מצב חירום כללי. את.ה לא צריך.ה לקבל ניקוד, את.ה צריך.ה שיחזיקו אותך, שיקשיבו, ושיביאו כל עזרה שאפשר להביא עכשיו.</p>
+      <button class="overlay-button" id="overlay-reset" type="button">חזרו למדד הרגיל</button>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
