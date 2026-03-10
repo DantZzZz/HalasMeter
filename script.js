@@ -630,14 +630,6 @@ function handleFacebookShare() {
 
 function handleDownloadShareAsset() {
   const { blob, resultState } = requireShareAsset();
-
-  if (canNativeFileShare(blob, resultState)) {
-    return nativeShareImage(blob, resultState)
-      .then(() => {
-        setButtonFeedback(dom.shareButton, "נפתח חלון שיתוף");
-      });
-  }
-
   downloadBlob(blob, getShareFilename(resultState));
   setButtonFeedback(dom.shareButton, "התמונה ירדה");
 }
