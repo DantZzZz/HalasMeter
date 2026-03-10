@@ -104,7 +104,10 @@ const state = {
   animatedScore: 0,
   scoreAnimationFrame: null,
   isSharing: false,
-  shareFeedbackTimeout: null
+  shareFeedbackTimeout: null,
+  shareImageBlob: null,
+  sharePreviewUrl: "",
+  shareResultState: null
 };
 
 const dom = {
@@ -123,6 +126,14 @@ const dom = {
   shareCardScoreValue: document.getElementById("share-card-score-value"),
   shareCardScoreLabel: document.getElementById("share-card-score-label"),
   shareCardDescription: document.getElementById("share-card-description"),
+  shareOverlay: document.getElementById("share-overlay"),
+  shareClose: document.getElementById("share-close"),
+  sharePreviewImage: document.getElementById("share-preview-image"),
+  shareWhatsapp: document.getElementById("share-whatsapp"),
+  shareInstagram: document.getElementById("share-instagram"),
+  shareFacebook: document.getElementById("share-facebook"),
+  shareDownload: document.getElementById("share-download"),
+  shareCopyLink: document.getElementById("share-copy-link"),
   infinityOverlay: document.getElementById("infinity-overlay"),
   overlayReset: document.getElementById("overlay-reset")
 };
@@ -180,11 +191,30 @@ function setLiveFeedback(text) {
   dom.shareFeedback.textContent = text;
 }
 
+function getShareUrl() {
+  return window.location.href;
+}
+
+function updateShareActionsState() {
+  const isDisabled = state.isSharing || !state.shareImageBlob;
+  [
+    dom.shareWhatsapp,
+    dom.shareInstagram,
+    dom.shareFacebook,
+    dom.shareDownload,
+    dom.shareCopyLink
+  ].forEach((button) => {
+    button.disabled = isDisabled;
+    button.setAttribute("aria-disabled", String(isDisabled));
+  });
+}
+
 function updateShareButtonState() {
   const isComplete = isQuestionnaireComplete();
   dom.shareButton.disabled = state.isSharing || !isComplete;
   dom.shareButton.setAttribute("aria-disabled", String(dom.shareButton.disabled));
   dom.shareButton.title = isComplete ? "" : "השלימו את כל השאלות כדי לשתף";
+  updateShareActionsState();
 
   if (state.isSharing) {
     dom.shareButton.textContent = "מכינים תמונה...";
@@ -358,7 +388,7 @@ function setInfinityMode(isVisible) {
 }
 
 function buildShareText(resultState) {
-  const url = window.location.href;
+  const url = getShareUrl();
   return `קיבלתי ${resultState.label} (${resultState.scoreText}) במדד הדובדבן של חלאסרטן\n${APP_CONFIG.shareCta}\n${url}`;
 }
 
@@ -379,6 +409,38 @@ function waitForImages(container) {
 function setShareStageVisibility(isVisible) {
   dom.shareStage.hidden = !isVisible;
   dom.shareStage.setAttribute("aria-hidden", String(!isVisible));
+}
+
+function setShareOverlayVisibility(isVisible) {
+  dom.shareOverlay.classList.toggle("is-visible", isVisible);
+  dom.shareOverlay.setAttribute("aria-hidden", String(!isVisible));
+}
+
+function revokeSharePreviewUrl() {
+  if (!state.sharePreviewUrl) {
+    return;
+  }
+
+  URL.revokeObjectURL(state.sharePreviewUrl);
+  state.sharePreviewUrl = "";
+}
+
+function setSharePreviewBlob(blob, resultState) {
+  revokeSharePreviewUrl();
+  state.shareImageBlob = blob;
+  state.shareResultState = resultState;
+  state.sharePreviewUrl = URL.createObjectURL(blob);
+  dom.sharePreviewImage.src = state.sharePreviewUrl;
+}
+
+function openShareDialog() {
+  setShareOverlayVisibility(true);
+  dom.shareClose.focus();
+}
+
+function closeShareDialog() {
+  setShareOverlayVisibility(false);
+  dom.shareButton.focus();
 }
 
 function waitForNextPaint() {
@@ -451,27 +513,89 @@ async function copyTextToClipboard(text) {
   helper.remove();
 }
 
-async function shareGeneratedImage(blob, resultState) {
-  const filename = `halasmeter-${resultState.scoreText}.png`;
-  const text = buildShareText(resultState);
+function getShareFilename(resultState) {
+  return `halasmeter-${resultState.scoreText}.png`;
+}
 
-  if (typeof File === "function" && typeof navigator.share === "function" && typeof navigator.canShare === "function") {
-    const shareFile = new File([blob], filename, { type: "image/png" });
+function getShareFile(blob, resultState) {
+  return new File([blob], getShareFilename(resultState), { type: "image/png" });
+}
 
-    if (navigator.canShare({ files: [shareFile] })) {
-      await navigator.share({
-        title: APP_CONFIG.shareTitle,
-        text,
-        url: window.location.href,
-        files: [shareFile]
-      });
-      return "shared";
-    }
+function canNativeFileShare(blob, resultState) {
+  if (typeof File !== "function" || typeof navigator.share !== "function" || typeof navigator.canShare !== "function") {
+    return false;
   }
 
-  downloadBlob(blob, filename);
-  await copyTextToClipboard(text);
-  return "downloaded";
+  return navigator.canShare({ files: [getShareFile(blob, resultState)] });
+}
+
+async function nativeShareImage(blob, resultState) {
+  await navigator.share({
+    title: APP_CONFIG.shareTitle,
+    text: buildShareText(resultState),
+    url: getShareUrl(),
+    files: [getShareFile(blob, resultState)]
+  });
+}
+
+function openShareWindow(url) {
+  window.open(url, "_blank", "noopener,noreferrer");
+}
+
+function requireShareAsset() {
+  if (!state.shareImageBlob || !state.shareResultState) {
+    throw new Error("Share image is not ready.");
+  }
+
+  return {
+    blob: state.shareImageBlob,
+    resultState: state.shareResultState
+  };
+}
+
+async function handleWhatsappShare() {
+  const { blob, resultState } = requireShareAsset();
+
+  if (canNativeFileShare(blob, resultState)) {
+    await nativeShareImage(blob, resultState);
+    setButtonFeedback(dom.shareButton, "בחרו WhatsApp");
+    return;
+  }
+
+  downloadBlob(blob, getShareFilename(resultState));
+  openShareWindow(`https://wa.me/?text=${encodeURIComponent(buildShareText(resultState))}`);
+  setButtonFeedback(dom.shareButton, "נפתחה ווטסאפ");
+}
+
+async function handleInstagramShare() {
+  const { blob, resultState } = requireShareAsset();
+  downloadBlob(blob, getShareFilename(resultState));
+  openShareWindow("https://www.instagram.com/");
+
+  try {
+    await copyTextToClipboard(buildShareText(resultState));
+  } catch {
+    // Ignore clipboard failures and still continue with the guided flow.
+  }
+
+  setButtonFeedback(dom.shareButton, "התמונה ירדה");
+}
+
+function handleFacebookShare() {
+  const shareUrl = getShareUrl();
+  openShareWindow(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`);
+  setButtonFeedback(dom.shareButton, "נפתח פייסבוק");
+}
+
+function handleDownloadShareAsset() {
+  const { blob, resultState } = requireShareAsset();
+  downloadBlob(blob, getShareFilename(resultState));
+  setButtonFeedback(dom.shareButton, "התמונה ירדה");
+}
+
+async function handleCopyShareLink() {
+  await copyTextToClipboard(getShareUrl());
+  setButtonFeedback(dom.shareButton, "הקישור הועתק");
 }
 
 function updateView() {
@@ -509,25 +633,32 @@ async function shareResult() {
 
   try {
     const blob = await generateShareImageBlob();
-    const shareOutcome = await shareGeneratedImage(blob, resultState);
-
-    if (shareOutcome === "downloaded") {
-      setButtonFeedback(dom.shareButton, "התמונה ירדה");
-      return;
-    }
-
-    setButtonFeedback(dom.shareButton, "מוכן לשיתוף");
+    setSharePreviewBlob(blob, resultState);
+    openShareDialog();
   } catch (error) {
     if (error?.name === "AbortError") {
       setLiveFeedback("");
       return;
     }
+    setButtonFeedback(dom.shareButton, "לא הצליח להכין תמונה");
+  } finally {
+    state.isSharing = false;
+    updateShareButtonState();
+  }
+}
 
-    try {
-      await copyTextToClipboard(buildShareText(resultState));
-      setButtonFeedback(dom.shareButton, "הטקסט הועתק");
-      return;
-    } catch {
+async function handleShareAction(action) {
+  if (state.isSharing) {
+    return;
+  }
+
+  state.isSharing = true;
+  updateShareButtonState();
+
+  try {
+    await action();
+  } catch (error) {
+    if (error?.name !== "AbortError") {
       setButtonFeedback(dom.shareButton, "לא הצליח");
     }
   } finally {
@@ -571,11 +702,31 @@ function resetInfinityBonus() {
   updateView();
 }
 
+function handleShareOverlayClick(event) {
+  if (event.target === dom.shareOverlay) {
+    closeShareDialog();
+  }
+}
+
+function handleDocumentKeydown(event) {
+  if (event.key === "Escape" && dom.shareOverlay.classList.contains("is-visible")) {
+    closeShareDialog();
+  }
+}
+
 function bindEvents() {
   dom.questionSections.addEventListener("click", handleQuestionClick);
   dom.bonusGrid.addEventListener("click", handleBonusClick);
   dom.shareButton.addEventListener("click", shareResult);
+  dom.shareClose.addEventListener("click", closeShareDialog);
+  dom.shareOverlay.addEventListener("click", handleShareOverlayClick);
+  dom.shareWhatsapp.addEventListener("click", () => handleShareAction(handleWhatsappShare));
+  dom.shareInstagram.addEventListener("click", () => handleShareAction(handleInstagramShare));
+  dom.shareFacebook.addEventListener("click", () => handleShareAction(handleFacebookShare));
+  dom.shareDownload.addEventListener("click", () => handleShareAction(handleDownloadShareAsset));
+  dom.shareCopyLink.addEventListener("click", () => handleShareAction(handleCopyShareLink));
   dom.overlayReset.addEventListener("click", resetInfinityBonus);
+  document.addEventListener("keydown", handleDocumentKeydown);
 }
 
 function initializeApp() {

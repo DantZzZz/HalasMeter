@@ -70,8 +70,8 @@
     <section class="overlay-card" aria-labelledby="overlay-title">
       <span class="overlay-eyebrow">המדד נשבר</span>
       <h2 id="overlay-title">∞</h2>
-      <p>אין לנו בדיחה מספיק טובה לרגע הזה. אם יש לך סרטן ונפל טיל על הבית, מדד הדובדבן מפסיק להיות משחק של מספרים.</p>
-      <p>מבחינתנו זה לא "עוד תוצאה", זה מצב חירום פרטי בתוך מצב חירום כללי. את.ה לא צריך.ה לקבל ניקוד, את.ה צריך.ה שיחזיקו אותך, שיקשיבו, ושיביאו כל עזרה שאפשר להביא עכשיו.</p>
+      <p>טוב ניצחת.</p>
+      <p>אין לנו בדיחה מספיק טובה לרגע הזה. פאק. איזה מצב קיצוני. אפשר להציע לך חיבוק? קילו גלידה? מדליה מפלסטיק? מזמינים אותך לדבר עם אור ההלפרית 💗 אנחנו כאן בשבילך</p>
       <button class="overlay-button" id="overlay-reset" type="button">חזרו למדד הרגיל</button>
     </section>
   </div>
@@ -100,6 +100,38 @@
           </span>
         </div>
         <p class="share-card-footer">בדקו איפה אתם עומדים במדד הדובדבן של חלאסרטן</p>
+      </div>
+    </section>
+  </div>
+
+  <div class="floating-overlay share-overlay" id="share-overlay" aria-hidden="true">
+    <section class="share-dialog" role="dialog" aria-modal="true" aria-labelledby="share-dialog-title">
+      <button class="share-dialog-close" id="share-close" type="button" aria-label="סגירת חלון השיתוף">×</button>
+      <h2 id="share-dialog-title">שתפו את התוצאה שלכם</h2>
+      <p class="share-dialog-note">הנה התמונה שתעלה לשיתוף. אפשר להוריד אותה או להמשיך לפלטפורמה שבא לכם.</p>
+
+      <div class="share-preview-shell">
+        <img class="share-preview-image" id="share-preview-image" alt="תצוגה מקדימה של תמונת השיתוף">
+      </div>
+
+      <div class="share-platforms" aria-label="אפשרויות שיתוף">
+        <button class="share-platform-button share-platform-button--whatsapp" id="share-whatsapp" type="button">
+          <span class="share-platform-icon" aria-hidden="true">W</span>
+          <span class="share-platform-label">WhatsApp</span>
+        </button>
+        <button class="share-platform-button share-platform-button--instagram" id="share-instagram" type="button">
+          <span class="share-platform-icon" aria-hidden="true">I</span>
+          <span class="share-platform-label">Instagram</span>
+        </button>
+        <button class="share-platform-button share-platform-button--facebook" id="share-facebook" type="button">
+          <span class="share-platform-icon" aria-hidden="true">f</span>
+          <span class="share-platform-label">Facebook</span>
+        </button>
+      </div>
+
+      <div class="share-utility-actions">
+        <button class="share-utility-button" id="share-download" type="button">הורדת תמונה</button>
+        <button class="share-utility-button" id="share-copy-link" type="button">העתקת קישור</button>
       </div>
     </section>
   </div>
