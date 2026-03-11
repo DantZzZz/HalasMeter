@@ -969,21 +969,23 @@ main {
 
 .share-utilities {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 
 .share-utility-button {
   display: grid;
-  justify-items: center;
-  gap: 10px;
-  padding: 14px 10px 12px;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  justify-items: start;
+  gap: 12px;
+  padding: 14px 16px;
   border-radius: 20px;
-  text-align: center;
+  text-align: right;
 }
 
 .share-utility-label {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   line-height: 1.35;
   font-weight: 800;
   color: var(--text);
@@ -1162,17 +1164,17 @@ main {
   }
 
   .share-utilities {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 6px;
   }
 
   .share-utility-button {
-    padding: 12px 8px 10px;
-    gap: 8px;
+    padding: 12px 14px;
+    gap: 10px;
   }
 
   .share-utility-label {
-    font-size: 0.74rem;
+    font-size: 0.82rem;
   }
 }
 
