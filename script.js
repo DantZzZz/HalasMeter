@@ -544,8 +544,12 @@ function downloadBlob(blob, filename) {
 
 async function copyTextToClipboard(text) {
   if (navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(text);
-    return;
+    try {
+      await navigator.clipboard.writeText(text);
+      return;
+    } catch {
+      // Fall back to execCommand for browsers that expose the API but still reject writes.
+    }
   }
 
   const helper = document.createElement("textarea");
@@ -554,8 +558,12 @@ async function copyTextToClipboard(text) {
   helper.className = "visually-hidden";
   document.body.appendChild(helper);
   helper.select();
-  document.execCommand("copy");
+  const didCopy = document.execCommand("copy");
   helper.remove();
+
+  if (!didCopy) {
+    throw new Error("Clipboard copy failed.");
+  }
 }
 
 function getShareFilename(resultState) {
