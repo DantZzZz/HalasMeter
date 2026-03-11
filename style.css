@@ -372,6 +372,7 @@ main {
   width: 100%;
   text-align: right;
   appearance: none;
+  -webkit-tap-highlight-color: transparent;
   cursor: pointer;
   border: 1px solid var(--line);
   background: var(--surface);
@@ -395,6 +396,11 @@ main {
 .bonus-button:focus-visible {
   transform: translateY(-1px);
   border-color: rgba(237, 16, 104, 0.55);
+  outline: none;
+}
+
+.option-button:focus,
+.bonus-button:focus {
   outline: none;
 }
 
