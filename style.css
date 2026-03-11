@@ -809,7 +809,7 @@ main {
 }
 
 .share-dialog-note {
-  margin: 0 0 12px;
+  margin: 0 0 16px;
   color: var(--muted);
   font-size: 0.96rem;
   line-height: 1.5;
@@ -841,7 +841,7 @@ main {
 }
 
 .share-preview-shell {
-  margin-bottom: 12px;
+  margin-bottom: 18px;
   padding: 8px;
   border-radius: 24px;
   background: linear-gradient(180deg, rgba(255, 241, 247, 0.88) 0%, rgba(255, 255, 255, 0.96) 100%);
@@ -860,35 +860,97 @@ main {
   background: #fff;
 }
 
+.share-dialog-section {
+  display: grid;
+  gap: 10px;
+}
+
+.share-dialog-section + .share-dialog-section {
+  margin-top: 16px;
+}
+
+.share-dialog-section-header {
+  display: grid;
+  gap: 4px;
+}
+
+.share-dialog-section-title {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: var(--accent-dark);
+}
+
+.share-dialog-section-note {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
 .share-platforms {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 7.5px;
-  direction: ltr;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.share-platform-button,
+.share-utility-button {
+  appearance: none;
+  border: 1px solid rgba(237, 16, 104, 0.12);
+  background: rgba(255, 255, 255, 0.96);
+  cursor: pointer;
+  color: var(--text);
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
 }
 
 .share-platform-button {
-  appearance: none;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
   display: grid;
-  justify-items: center;
-  gap: 8px;
-  color: var(--text);
-  padding: 0;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 24px;
+  text-align: right;
+  box-shadow: 0 16px 34px rgba(26, 26, 26, 0.08);
 }
 
-.share-platform-button:disabled {
+.share-platform-button:hover,
+.share-platform-button:focus-visible,
+.share-utility-button:hover,
+.share-utility-button:focus-visible {
+  border-color: rgba(237, 16, 104, 0.28);
+  box-shadow: 0 18px 36px rgba(237, 16, 104, 0.14);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.share-platform-button:disabled,
+.share-utility-button:disabled {
   cursor: wait;
   opacity: 0.7;
+  transform: none;
+  box-shadow: none;
+}
+
+.share-platform-text {
+  display: grid;
+  gap: 4px;
+}
+
+.share-platform-label {
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: var(--text);
 }
 
 .share-platform-icon {
-  width: 60px;
-  height: 60px;
+  width: 56px;
+  height: 56px;
   display: grid;
   place-items: center;
+  flex: 0 0 auto;
 }
 
 .share-platform-icon-image {
@@ -899,9 +961,48 @@ main {
   filter: drop-shadow(0 16px 28px rgba(26, 26, 26, 0.12));
 }
 
-.share-platform-label {
-  font-size: 0.85rem;
+.share-platform-helper {
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.share-utilities {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.share-utility-button {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 14px 10px 12px;
+  border-radius: 20px;
+  text-align: center;
+}
+
+.share-utility-label {
+  font-size: 0.82rem;
+  line-height: 1.35;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.share-dialog-status {
+  min-height: 1.5em;
+  margin: 14px 0 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
   font-weight: 700;
+  color: var(--accent-dark);
+}
+
+.share-dialog-footnote {
+  margin: 10px 0 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--muted);
 }
 
 .floating-overlay {
@@ -1042,17 +1143,35 @@ main {
     border-radius: 28px;
   }
 
-  .share-platforms {
-    gap: 6px;
+  .share-platform-button {
+    gap: 12px;
+    padding: 13px 14px;
   }
 
   .share-platform-icon {
     width: 52px;
     height: 52px;
-    font-size: 1.15rem;
   }
 
   .share-platform-label {
+    font-size: 0.92rem;
+  }
+
+  .share-platform-helper {
+    font-size: 0.8rem;
+  }
+
+  .share-utilities {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .share-utility-button {
+    padding: 12px 8px 10px;
+    gap: 8px;
+  }
+
+  .share-utility-label {
     font-size: 0.74rem;
   }
 }

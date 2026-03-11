@@ -110,34 +110,67 @@
     <section class="share-dialog" role="dialog" aria-modal="true" aria-labelledby="share-dialog-title">
       <button class="share-dialog-close" id="share-close" type="button" aria-label="סגירת חלון השיתוף">×</button>
       <h2 id="share-dialog-title">שתפו את התוצאה שלכם</h2>
-      <p class="share-dialog-note">הנה התמונה שתעלה לשיתוף. אפשר להוריד אותה או להמשיך לפלטפורמה שבא לכם.</p>
+      <p class="share-dialog-note">התמונה מוכנה. בחרו איפה לשתף, או קחו לעצמכם את כל מה שצריך כדי לפרסם אחר כך.</p>
 
       <div class="share-preview-shell">
         <img class="share-preview-image" id="share-preview-image" alt="תצוגה מקדימה של תמונת השיתוף">
       </div>
 
-      <div class="share-platforms" aria-label="אפשרויות שיתוף">
-        <button class="share-platform-button share-platform-button--instagram" id="share-instagram" type="button">
-          <span class="share-platform-icon" aria-hidden="true"><img class="share-platform-icon-image" src="instagram.png" alt=""></span>
-          <span class="share-platform-label">Instagram</span>
-        </button>
-        <button class="share-platform-button share-platform-button--facebook" id="share-facebook" type="button">
-          <span class="share-platform-icon" aria-hidden="true"><img class="share-platform-icon-image" src="facebook.png" alt=""></span>
-          <span class="share-platform-label">Facebook</span>
-        </button>
-        <button class="share-platform-button share-platform-button--whatsapp" id="share-whatsapp" type="button">
-          <span class="share-platform-icon" aria-hidden="true"><img class="share-platform-icon-image" src="whatsapp.png" alt=""></span>
-          <span class="share-platform-label">WhatsApp</span>
-        </button>
-        <button class="share-platform-button share-platform-button--download" id="share-download" type="button">
-          <span class="share-platform-icon" aria-hidden="true"><img class="share-platform-icon-image" src="downloading.png" alt=""></span>
-          <span class="share-platform-label">Download</span>
-        </button>
-        <button class="share-platform-button share-platform-button--copy" id="share-copy-link" type="button">
-          <span class="share-platform-icon" aria-hidden="true"><img class="share-platform-icon-image" src="copy.png" alt=""></span>
-          <span class="share-platform-label">Copy link</span>
-        </button>
-      </div>
+      <section class="share-dialog-section" aria-labelledby="share-destinations-title">
+        <div class="share-dialog-section-header">
+          <h3 class="share-dialog-section-title" id="share-destinations-title">שיתוף מהיר לפלטפורמה</h3>
+          <p class="share-dialog-section-note">כל פלטפורמה נפתחת בדרך שהכי מתאימה לה.</p>
+        </div>
+
+        <div class="share-platforms" aria-label="פלטפורמות שיתוף">
+          <button class="share-platform-button share-platform-button--whatsapp" id="share-whatsapp" type="button">
+            <span class="share-platform-icon" aria-hidden="true"><img class="share-platform-icon-image" src="whatsapp.png" alt=""></span>
+            <span class="share-platform-text">
+              <span class="share-platform-label">WhatsApp</span>
+              <span class="share-platform-helper">נפתח הודעה עם טקסט קצר ולינק מוכן לשליחה.</span>
+            </span>
+          </button>
+          <button class="share-platform-button share-platform-button--instagram" id="share-instagram" type="button">
+            <span class="share-platform-icon" aria-hidden="true"><img class="share-platform-icon-image" src="instagram.png" alt=""></span>
+            <span class="share-platform-text">
+              <span class="share-platform-label">Instagram</span>
+              <span class="share-platform-helper">נוריד את התמונה ונעתיק כיתוב מוכן לסטורי או לפוסט.</span>
+            </span>
+          </button>
+          <button class="share-platform-button share-platform-button--facebook" id="share-facebook" type="button">
+            <span class="share-platform-icon" aria-hidden="true"><img class="share-platform-icon-image" src="facebook.png" alt=""></span>
+            <span class="share-platform-text">
+              <span class="share-platform-label">Facebook</span>
+              <span class="share-platform-helper">נפתח שיתוף עם הלינק לתוצאה שלכם כדי להזמין עוד אנשים.</span>
+            </span>
+          </button>
+        </div>
+      </section>
+
+      <section class="share-dialog-section share-dialog-section--utilities" aria-labelledby="share-utilities-title">
+        <div class="share-dialog-section-header">
+          <h3 class="share-dialog-section-title" id="share-utilities-title">הכינו לעצמכם הכל</h3>
+          <p class="share-dialog-section-note">אם בא לכם לפרסם לבד, כל חומרי השיתוף כבר כאן.</p>
+        </div>
+
+        <div class="share-utilities" aria-label="כלי עזר לשיתוף">
+          <button class="share-utility-button share-utility-button--download" id="share-download" type="button">
+            <span class="share-platform-icon" aria-hidden="true"><img class="share-platform-icon-image" src="downloading.png" alt=""></span>
+            <span class="share-utility-label">הורידו תמונה</span>
+          </button>
+          <button class="share-utility-button share-utility-button--copy" id="share-copy-caption" type="button">
+            <span class="share-platform-icon" aria-hidden="true"><img class="share-platform-icon-image" src="copy.png" alt=""></span>
+            <span class="share-utility-label">העתיקו כיתוב</span>
+          </button>
+          <button class="share-utility-button share-utility-button--copy" id="share-copy-link" type="button">
+            <span class="share-platform-icon" aria-hidden="true"><img class="share-platform-icon-image" src="copy.png" alt=""></span>
+            <span class="share-utility-label">העתיקו לינק</span>
+          </button>
+        </div>
+      </section>
+
+      <p class="share-dialog-status" id="share-dialog-status" aria-live="polite"></p>
+      <p class="share-dialog-footnote">ב-Instagram אי אפשר להעלות פוסט ישירות מהאתר, אז נכין לכם את התמונה והכיתוב ותמשיכו משם.</p>
     </section>
   </div>
 

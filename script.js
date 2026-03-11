@@ -1,6 +1,6 @@
 const APP_CONFIG = {
   shareTitle: "מדד הדובדבן של חלאסרטן",
-  shareCta: "בדקו איפה אתם עומדים במדד הדובדבן של חלאסרטן",
+  shareCta: "בדקו גם אתם איפה אתם עומדים במדד הדובדבן של חלאסרטן",
   questionHelperText: "בחרו תשובה אחת. אפשר תמיד לחזור ולשנות.",
   infinityResult: {
     label: "המדד נשבר",
@@ -131,10 +131,12 @@ const dom = {
   shareOverlay: document.getElementById("share-overlay"),
   shareClose: document.getElementById("share-close"),
   sharePreviewImage: document.getElementById("share-preview-image"),
+  shareDialogStatus: document.getElementById("share-dialog-status"),
   shareWhatsapp: document.getElementById("share-whatsapp"),
   shareInstagram: document.getElementById("share-instagram"),
   shareFacebook: document.getElementById("share-facebook"),
   shareDownload: document.getElementById("share-download"),
+  shareCopyCaption: document.getElementById("share-copy-caption"),
   shareCopyLink: document.getElementById("share-copy-link"),
   infinityOverlay: document.getElementById("infinity-overlay"),
   overlayReset: document.getElementById("overlay-reset")
@@ -230,6 +232,7 @@ function updateShareButtonHelper() {
 
 function setLiveFeedback(text) {
   dom.shareFeedback.textContent = text;
+  dom.shareDialogStatus.textContent = text;
 }
 
 function getShareUrl() {
@@ -243,6 +246,7 @@ function updateShareActionsState() {
     dom.shareInstagram,
     dom.shareFacebook,
     dom.shareDownload,
+    dom.shareCopyCaption,
     dom.shareCopyLink
   ].forEach((button) => {
     button.disabled = isDisabled;
@@ -431,7 +435,11 @@ function setInfinityMode(isVisible) {
 
 function buildShareText(resultState) {
   const url = getShareUrl();
-  return `קיבלתי ${resultState.label} (${resultState.scoreText}) במדד הדובדבן של חלאסרטן\n${APP_CONFIG.shareCta}\n${url}`;
+  return `${buildShareCaption(resultState)}\n${APP_CONFIG.shareCta}\n${url}`;
+}
+
+function buildShareCaption(resultState) {
+  return `יצא לי ${resultState.label} (${resultState.scoreText}) במדד הדובדבן של חלאסרטן. כמה יצא לכם?`;
 }
 
 function waitForImages(container) {
@@ -574,10 +582,18 @@ function canNativeFileShare(blob, resultState) {
 async function nativeShareImage(blob, resultState) {
   await navigator.share({
     title: APP_CONFIG.shareTitle,
-    text: buildShareText(resultState),
+    text: buildShareCaption(resultState),
     url: getShareUrl(),
     files: [getShareFile(blob, resultState)]
   });
+}
+
+function isMobileDevice() {
+  if (navigator.userAgentData && typeof navigator.userAgentData.mobile === "boolean") {
+    return navigator.userAgentData.mobile;
+  }
+
+  return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 }
 
 function openShareWindow(url) {
@@ -600,27 +616,24 @@ async function handleWhatsappShare() {
 
   if (canNativeFileShare(blob, resultState)) {
     await nativeShareImage(blob, resultState);
-    setButtonFeedback(dom.shareButton, "בחרו WhatsApp");
     return;
   }
 
-  downloadBlob(blob, getShareFilename(resultState));
   openShareWindow(`https://wa.me/?text=${encodeURIComponent(buildShareText(resultState))}`);
   setButtonFeedback(dom.shareButton, "נפתחה ווטסאפ");
 }
 
 async function handleInstagramShare() {
   const { blob, resultState } = requireShareAsset();
-  downloadBlob(blob, getShareFilename(resultState));
   openShareWindow("https://www.instagram.com/");
+  downloadBlob(blob, getShareFilename(resultState));
 
   try {
-    await copyTextToClipboard(buildShareText(resultState));
+    await copyTextToClipboard(buildShareCaption(resultState));
+    setButtonFeedback(dom.shareButton, "התמונה ירדה והכיתוב הועתק");
   } catch {
-    // Ignore clipboard failures and still continue with the guided flow.
+    setButtonFeedback(dom.shareButton, "התמונה ירדה");
   }
-
-  setButtonFeedback(dom.shareButton, "התמונה ירדה");
 }
 
 function handleFacebookShare() {
@@ -633,6 +646,12 @@ function handleDownloadShareAsset() {
   const { blob, resultState } = requireShareAsset();
   downloadBlob(blob, getShareFilename(resultState));
   setButtonFeedback(dom.shareButton, "התמונה ירדה");
+}
+
+async function handleCopyShareCaption() {
+  const { resultState } = requireShareAsset();
+  await copyTextToClipboard(buildShareCaption(resultState));
+  setButtonFeedback(dom.shareButton, "הכיתוב הועתק");
 }
 
 async function handleCopyShareLink() {
@@ -676,6 +695,20 @@ async function shareResult() {
   try {
     const blob = await generateShareImageBlob();
     setSharePreviewBlob(blob, resultState);
+
+    if (isMobileDevice() && canNativeFileShare(blob, resultState)) {
+      try {
+        await nativeShareImage(blob, resultState);
+        setLiveFeedback("");
+        return;
+      } catch (error) {
+        if (error?.name === "AbortError") {
+          setLiveFeedback("");
+          return;
+        }
+      }
+    }
+
     openShareDialog();
   } catch (error) {
     if (error?.name === "AbortError") {
@@ -766,6 +799,7 @@ function bindEvents() {
   dom.shareInstagram.addEventListener("click", () => handleShareAction(handleInstagramShare));
   dom.shareFacebook.addEventListener("click", () => handleShareAction(handleFacebookShare));
   dom.shareDownload.addEventListener("click", () => handleShareAction(handleDownloadShareAsset));
+  dom.shareCopyCaption.addEventListener("click", () => handleShareAction(handleCopyShareCaption));
   dom.shareCopyLink.addEventListener("click", () => handleShareAction(handleCopyShareLink));
   dom.overlayReset.addEventListener("click", resetInfinityBonus);
   document.addEventListener("keydown", handleDocumentKeydown);
