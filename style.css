@@ -728,8 +728,8 @@ main {
 .share-card-progress-block {
   display: grid;
   gap: 24px;
-  align-self: end;
-  margin-top: auto;
+  align-self: start;
+  margin-top: 32px;
 }
 
 .share-card-progress {
